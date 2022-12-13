@@ -1,0 +1,31 @@
+CREATE TABLE Naoblake
+(
+  koordinate VARCHAR(50) NOT NULL,
+  datum DATE NOT NULL,
+  prisutnost INT NOT NULL,
+  PRIMARY KEY (koordinate, datum)
+);
+
+CREATE TABLE Požari
+(
+  koordinate VARCHAR(50) NOT NULL,
+  datum DATE NOT NULL,
+  prisutnost INT NOT NULL,
+  PRIMARY KEY (koordinate, datum)
+);
+
+CREATE TABLE PolarnaSvijetlost
+(
+  koordinate VARCHAR(50) NOT NULL,
+  datumvrijeme DATETIME NOT NULL,
+  prisutnost INT NOT NULL,
+  PRIMARY KEY (koordinate, datumvrijeme)
+);
+
+CREATE TABLE BioluminiscentniPlanktoni
+(
+  koordinate VARCHAR(50) NOT NULL,
+  datum DATE NOT NULL,
+  prisutnost INT NOT NULL,
+  PRIMARY KEY (koordinate, datum)
+);
