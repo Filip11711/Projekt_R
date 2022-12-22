@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;
+import java.sql.Date;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @Embeddable
 public class PrimaryKeyId implements Serializable {
-    private LocalDateTime datum;
-    private String koordinate;
+    private Date datum;
+    private String longitude;
+    private String latitude;
 }
