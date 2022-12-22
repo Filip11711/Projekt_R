@@ -15,6 +15,6 @@ import java.time.LocalDateTime;
 @Embeddable
 public class PrimaryKeyId implements Serializable {
     private Date datum;
-    private String longitude;
-    private String latitude;
+    private Integer longitude;
+    private Integer latitude;
 }

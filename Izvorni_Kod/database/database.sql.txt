@@ -21,11 +21,3 @@ CREATE TABLE PolarnaSvijetlost
   prisutnost INT NOT NULL,
   PRIMARY KEY (koordinate, datumvrijeme)
 );
-
-CREATE TABLE BioluminiscentniPlanktoni
-(
-  koordinate VARCHAR(50) NOT NULL,
-  datum DATE NOT NULL,
-  prisutnost INT NOT NULL,
-  PRIMARY KEY (koordinate, datum)
-);
