@@ -4,7 +4,7 @@ import jakarta.persistence.Embeddable;
 import lombok.*;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.sql.Timestamp;
 
 @Getter
 @Setter
@@ -12,8 +12,8 @@ import java.sql.Date;
 @AllArgsConstructor
 @Data
 @Embeddable
-public class PrimaryKeyId implements Serializable {
-    private Date datum;
+public class PrimaryKey implements Serializable {
+    private Timestamp datumvrijeme;
     private Integer longitude;
     private Integer latitude;
 }

@@ -1,9 +1,8 @@
 package hr.fer.backend.model;
 
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
 import lombok.*;
-
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
 
 @Getter
 @Setter
@@ -14,7 +13,7 @@ import javax.persistence.Entity;
 @Entity(name = "PolarnaSvijetlost")
 public class PolarnaSvijetlost {
     @EmbeddedId
-    private PrimaryKeyId primaryKeyId;
+    private PrimaryKey primaryKey;
 
     private Integer prisutnost;
 }
