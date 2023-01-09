@@ -1,23 +1,26 @@
 CREATE TABLE Naoblake
 (
-  koordinate VARCHAR(50) NOT NULL,
-  datum DATE NOT NULL,
+  datum DATE,
+  longitude INT,
+  latitude INT,
   prisutnost INT NOT NULL,
-  PRIMARY KEY (koordinate, datum)
+  PRIMARY KEY (datum, longitude, latitude)
 );
 
 CREATE TABLE Požari
 (
-  koordinate VARCHAR(50) NOT NULL,
-  datum DATE NOT NULL,
+  datum DATE,
+  longitude INT,
+  latitude INT,
   prisutnost INT NOT NULL,
-  PRIMARY KEY (koordinate, datum)
+  PRIMARY KEY (datum, longitude, latitude)
 );
 
 CREATE TABLE PolarnaSvijetlost
 (
-  koordinate VARCHAR(50) NOT NULL,
-  datumvrijeme DATETIME NOT NULL,
+  datumvrijeme TIMESTAMP,
+  longitude INT,
+  latitude INT,
   prisutnost INT NOT NULL,
-  PRIMARY KEY (koordinate, datumvrijeme)
+  PRIMARY KEY (datumvrijeme, longitude, latitude)
 );

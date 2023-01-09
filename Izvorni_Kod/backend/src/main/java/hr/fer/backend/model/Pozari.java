@@ -1,9 +1,10 @@
 package hr.fer.backend.model;
 
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
 import lombok.*;
 
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
+
 
 @Getter
 @Setter
