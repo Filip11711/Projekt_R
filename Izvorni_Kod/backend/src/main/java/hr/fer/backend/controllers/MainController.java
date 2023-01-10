@@ -1,6 +1,8 @@
 package hr.fer.backend.controllers;
 
 import hr.fer.backend.model.Naoblake;
+import hr.fer.backend.model.PrimaryKeyId;
+import hr.fer.backend.responseClasses.BioluminiscentniPlanktoniResponse;
 import hr.fer.backend.responseClasses.DatumResponse;
 import hr.fer.backend.services.BioluminiscentniPlanktoniService;
 import hr.fer.backend.services.NaoblakeService;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,6 +35,7 @@ public class MainController {
     @CrossOrigin(origins = "*")
     @GetMapping("api/getByDatum")
     ResponseEntity<?> getDataByDatum(@Valid @RequestParam LocalDateTime DatumVrijeme) throws IOException {
+        LocalDate date = DatumVrijeme.toLocalDate();
         Date datum = Date.valueOf(DatumVrijeme.toLocalDate());
         Timestamp datumvrijeme = Timestamp.valueOf(DatumVrijeme);
 
@@ -40,13 +44,17 @@ public class MainController {
                 return ResponseEntity.ok("Error");
             }
         }
+
+        List<BioluminiscentniPlanktoniResponse> planktioni = bioluminiscentniPlanktoniService.getBioluminiscentnePlanktoneByDatum(date);
+
         List<Naoblake> naoblake = naoblakeService.getNaoblakeByDatum(datum);
-        return ResponseEntity.ok(new DatumResponse(naoblake));
+        return ResponseEntity.ok(new DatumResponse(naoblake, planktioni));
     }
 
     @CrossOrigin(origins = "*")
     @GetMapping("/api/getByDatumAndCoordinates")
     void getCSVFile(HttpServletResponse servletResponse, @Valid @RequestParam LocalDateTime DatumVrijeme, Integer longitude, Integer latitude) throws IOException {
+        LocalDate date = DatumVrijeme.toLocalDate();
         Date datum = Date.valueOf(DatumVrijeme.toLocalDate());
         Timestamp datumvrijeme = Timestamp.valueOf(DatumVrijeme);
         Boolean check = true;
@@ -54,13 +62,17 @@ public class MainController {
             check = naoblakeService.downloadData(datum);
         }
         Naoblake naoblaka = naoblakeService.getNaoblakaByDatumAndLocation(datum, longitude, latitude);
+        if (naoblaka == null) {
+            naoblaka = new Naoblake(new PrimaryKeyId(datum, longitude, latitude), 1);
+        }
+        BioluminiscentniPlanktoniResponse plaktoni = bioluminiscentniPlanktoniService.getgetBioluminiscentnePlanktoneByDatumAndCoordinates(date, longitude, latitude);
 
         servletResponse.setContentType("text/csv");
         servletResponse.addHeader("Content-Disposition","attachment; filename=\"PrirodnePojave.csv\"");
         try (CSVPrinter csvPrinter = new CSVPrinter(servletResponse.getWriter(), CSVFormat.DEFAULT)) {
-            csvPrinter.printRecord("Vremenska Oznaka", "Longitude", "Latitude", "Naoblake");
+            csvPrinter.printRecord("Vremenska Oznaka", "Longitude", "Latitude", "Naoblake", "Bioluminiscentni planktoni");
             if (check) {
-                csvPrinter.printRecord(DatumVrijeme, longitude, latitude, naoblaka.getPrisutnost());
+                csvPrinter.printRecord(DatumVrijeme, longitude, latitude, naoblaka.getPrisutnost(), plaktoni.getPrisutnost());
             } else {
                 csvPrinter.printRecord("Error");
             }

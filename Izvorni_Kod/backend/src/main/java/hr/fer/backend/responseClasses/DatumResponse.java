@@ -15,4 +15,5 @@ import java.util.List;
 @NoArgsConstructor
 public class DatumResponse {
     private List<Naoblake> naoblake;
+    private List<BioluminiscentniPlanktoniResponse> planktoni;
 }
