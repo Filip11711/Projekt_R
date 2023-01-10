@@ -16,4 +16,5 @@ import java.util.List;
 public class DatumResponse {
     private List<Naoblake> naoblake;
     private List<BioluminiscentniPlanktoniResponse> planktoni;
+    private List<Pozari> pozari;
 }
