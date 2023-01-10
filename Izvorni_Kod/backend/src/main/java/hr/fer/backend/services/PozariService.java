@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.util.List;
 import java.util.Scanner;
 import java.net.URL;
 import java.io.File;
@@ -26,13 +27,13 @@ public class PozariService {
         try {
             FileUtils.copyURLToFile(
                     new URL("https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846176&cs=rgb&format=CSV&width=360&height=180"),
-                    new File("C:\\Users\\Martin\\Downloads\\Pozari.csv"));
+                    new File("DataFolder\\Pozari.csv"));
         } catch (Exception exc) {
             return false;
         }
         List<Pozari> pozari = new ArrayList<>();
 
-        try (Scanner scanner = new Scanner(new File("C:\\Users\\Martin\\Downloads\\Pozari.csv"));) {
+        try (Scanner scanner = new Scanner(new File("DataFolder\\Pozari.csv"));) {
             
             Integer Latitude = 90;
             
@@ -51,9 +52,7 @@ public class PozariService {
                             Float value = Float.valueOf(rowScanner.next());
                             if (!(value >= 0.0 && value <= 1.0)) {
                                 pozari.add(new Pozari(new PrimaryKeyId(datum, Longitude, Latitude), 2));
-                            } else if (value < 0.2) {
-                                pozari.add(new Pozari(new PrimaryKeyId(datum, Longitude, Latitude), 0));
-                            } else {
+                            } else if (value >= 0.2) {
                                 pozari.add(new Pozari(new PrimaryKeyId(datum, Longitude, Latitude), 1));
                             }
                         } catch (Exception exc) {}
@@ -72,10 +71,10 @@ public class PozariService {
     }
 
     public List<Pozari> getPozariByDatum(Date datum) {
-        return naoblakeRepository.findAllByPrimaryKeyId_DatumAndPrisutnostIsGreaterThanEqual(datum, 1);
+        return pozariRepository.findAllByPrimaryKeyId_DatumAndPrisutnostIsGreaterThanEqual(datum, 1);
     }
 
-    public Pozari getPozarByDatumAndLocation(Date datum, Integer Longitude, Integer Latitude) {
+    public Pozari getPozariByDatumAndLocation(Date datum, Integer Longitude, Integer Latitude) {
         return pozariRepository.findByPrimaryKeyId(new PrimaryKeyId(datum, Longitude, Latitude));
     }
 
@@ -91,7 +90,7 @@ public class PozariService {
         for (int i = 0; i < total; i = i + batchSize) {
 
             if( i+ batchSize > total){
-                List<Naoblake> pozari1 = pozari.subList(i, total - 1);
+                List<Pozari> pozari1 = pozari.subList(i, total - 1);
                 pozariRepository.saveAll(pozari1);
                 pozariRepository.flush();
                 break;

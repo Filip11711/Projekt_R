@@ -88,4 +88,9 @@ public class MainController {
         }
 
     }
+
+    @GetMapping("/api/test")
+    void testmethod() throws IOException {
+        polarnaSvijetlostService.downloadDataPolarna();
+    }
 }
