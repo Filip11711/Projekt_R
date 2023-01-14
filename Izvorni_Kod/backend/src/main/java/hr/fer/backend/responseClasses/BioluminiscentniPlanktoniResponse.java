@@ -6,14 +6,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class BioluminiscentniPlanktoniResponse {
-    private Date datum;
-    private String longitude;
-    private String latitude;
+    private LocalDate datum;
+    private Integer longitude;
+    private Integer latitude;
     private Integer prisutnost;
 }

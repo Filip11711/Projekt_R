@@ -10,7 +10,7 @@ import lombok.*;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "PolarnaSvijetlost")
+@Entity(name = "Polarna")
 public class PolarnaSvijetlost {
     @EmbeddedId
     private PrimaryKey primaryKey;

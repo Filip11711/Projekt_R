@@ -16,7 +16,7 @@ CREATE TABLE Požari
   PRIMARY KEY (datum, longitude, latitude)
 );
 
-CREATE TABLE PolarnaSvijetlost
+CREATE TABLE Polarna
 (
   datumvrijeme TIMESTAMP,
   longitude INT,

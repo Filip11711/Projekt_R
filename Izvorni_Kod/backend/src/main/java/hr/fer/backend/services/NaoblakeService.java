@@ -24,15 +24,15 @@ public class NaoblakeService {
     public boolean downloadData(Date datum) {
         try {
             FileUtils.copyURLToFile(
-                    new URL("https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845945&cs=rgb&format=CSV&width=360&height=180"),
-                    new File("C:\\Users\\filip\\Desktop\\Folder\\Naoblaka.csv"));
+                    new URL("https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845944&cs=rgb&format=CSV&width=360&height=180"),
+                    new File("DataFolder\\Naoblaka.csv"));
         } catch (Exception exc) {
             return false;
         }
 
         List<Naoblake> naoblake = new ArrayList<>();
 
-        try (Scanner scanner = new Scanner(new File("C:\\Users\\filip\\Desktop\\Folder\\Naoblaka.csv"));) {
+        try (Scanner scanner = new Scanner(new File("DataFolder\\Naoblaka.csv"));) {
             Integer Latitude = 90;
             while(scanner.hasNextLine()) {
                 String line = scanner.nextLine();
@@ -46,8 +46,6 @@ public class NaoblakeService {
                                 naoblake.add(new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 2));
                             } else if (value < 0.3) {
                                 naoblake.add(new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 0));
-                            } else {
-                                naoblake.add(new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 1));
                             }
                         } catch (Exception exc) {}
                         Longitude += 1;
