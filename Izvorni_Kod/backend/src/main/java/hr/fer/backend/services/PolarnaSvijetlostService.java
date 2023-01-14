@@ -4,6 +4,7 @@ import hr.fer.backend.model.PolarnaSvijetlost;
 import hr.fer.backend.model.PrimaryKey;
 import hr.fer.backend.repository.PolarnaSvijetlostRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -28,7 +29,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class PolarnaSvijetlostService {
     private final PolarnaSvijetlostRepository polarnaSvijetlostRepository;
 
-    public boolean downloadDataPolarna() throws IOException {
+    @Scheduled(initialDelay = 60*60*1000, fixedDelay = 2*60*60*1000)
+    public void downloadDataPolarna() throws IOException {
         URL url = null;
         try {
             url = new URL("https://services.swpc.noaa.gov/json/ovation_aurora_latest.json");
@@ -116,13 +118,12 @@ public class PolarnaSvijetlostService {
             y = Integer.parseInt(yy);
             value = Integer.parseInt(valuee);
 
-            if(value > 0) {
-                polarnaSvijetlostRepository.save(new PolarnaSvijetlost(new PrimaryKey(vrijeme, x, y), value));
+            if(value > 3) {
+                polarnaSvijetlostRepository.save(new PolarnaSvijetlost(new PrimaryKey(vrijeme, x, y), 1));
             }
         }
 
 
-        return true;
     }
 
     public List<PolarnaSvijetlost> getPolarnaSvijetlostByDatum(Timestamp datum) {

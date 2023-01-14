@@ -1,8 +1,12 @@
 package hr.fer.backend.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import hr.fer.backend.model.Naoblake;
 import hr.fer.backend.model.Pozari;
 import hr.fer.backend.model.PrimaryKeyId;
+import hr.fer.backend.requstClasses.DatumAndCoordinatesRequest;
+import hr.fer.backend.requstClasses.RequestList;
 import hr.fer.backend.responseClasses.BioluminiscentniPlanktoniResponse;
 import hr.fer.backend.responseClasses.DatumResponse;
 import hr.fer.backend.services.BioluminiscentniPlanktoniService;
@@ -17,12 +21,12 @@ import org.apache.commons.csv.CSVPrinter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -53,44 +57,56 @@ public class MainController {
     }
 
     @CrossOrigin(origins = "*")
-    @GetMapping("/api/getByDatumAndCoordinates")
-    void getCSVFile(HttpServletResponse servletResponse, @Valid @RequestParam LocalDateTime DatumVrijeme, Integer longitude, Integer latitude) throws IOException {
-        LocalDate date = DatumVrijeme.toLocalDate();
-        Date datum = Date.valueOf(DatumVrijeme.toLocalDate());
-        Timestamp datumvrijeme = Timestamp.valueOf(DatumVrijeme);
-        Boolean check = true;
-        if (!naoblakeService.existsByDatum(datum) && !pozariService.existsByDatum(datum)) {
-            check = (naoblakeService.downloadData(datum) && pozariService.downloadData(datum));
-        }
-        Naoblake naoblaka = naoblakeService.getNaoblakaByDatumAndLocation(datum, longitude, latitude);
-        
-        if (naoblaka == null) {
-            naoblaka = new Naoblake(new PrimaryKeyId(datum, longitude, latitude), 1);
-        }
-        BioluminiscentniPlanktoniResponse plaktoni = bioluminiscentniPlanktoniService.getgetBioluminiscentnePlanktoneByDatumAndCoordinates(date, longitude, latitude);
+    @PostMapping("/api/getByDatumAndCoordinates")
+    void getCSVFile(HttpServletResponse servletResponse, @Valid @RequestBody String json) throws IOException {
+        RequestList requestList = new ObjectMapper().registerModule(new JSR310Module()).readValue(json, RequestList.class);
 
-        Pozari pozar = pozariService.getPozariByDatumAndLocation(datum, longitude, latitude);
-        if (pozar == null) {
-            pozar = new Pozari(new PrimaryKeyId(datum, longitude, latitude), 1);
+        DatumResponse datumResponse = new DatumResponse(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+
+        for(DatumAndCoordinatesRequest request: requestList.getRequestList()) {
+            LocalDate date = request.getDatumVrijeme().toLocalDate();
+            Date datum = Date.valueOf(date);
+            Timestamp datumvrijeme = Timestamp.valueOf(request.getDatumVrijeme());
+
+            if (!naoblakeService.existsByDatum(datum)) {
+                naoblakeService.downloadData(datum);
+            }
+            Naoblake naoblaka = naoblakeService.getNaoblakaByDatumAndLocation(datum, request.getLongitude(), request.getLatitude());
+
+            if (naoblaka == null) {
+                naoblaka = new Naoblake(new PrimaryKeyId(datum, request.getLongitude(), request.getLatitude()), 1);
+            }
+            BioluminiscentniPlanktoniResponse plaktoni = bioluminiscentniPlanktoniService.getgetBioluminiscentnePlanktoneByDatumAndCoordinates(date, request.getLongitude(), request.getLatitude());
+
+            //if (!pozariService.existsByDatum(datum)) {
+              //  pozariService.downloadData(datum);
+            //}
+
+            Pozari pozar = pozariService.getPozariByDatumAndLocation(datum, request.getLongitude(), request.getLatitude());
+            if (pozar == null) {
+                pozar = new Pozari(new PrimaryKeyId(datum, request.getLongitude(), request.getLatitude()), 0);
+            }
+
+            datumResponse.getNaoblake().add(naoblaka);
+            datumResponse.getPlanktoni().add(plaktoni);
+            datumResponse.getPozari().add(pozar);
         }
         
         servletResponse.setContentType("text/csv");
         servletResponse.addHeader("Content-Disposition","attachment; filename=\"PrirodnePojave.csv\"");
         try (CSVPrinter csvPrinter = new CSVPrinter(servletResponse.getWriter(), CSVFormat.DEFAULT)) {
             csvPrinter.printRecord("Vremenska Oznaka", "Longitude", "Latitude", "Naoblake", "Bioluminiscentni planktoni", "Pozari");
-            if (check) {
-                csvPrinter.printRecord(DatumVrijeme, longitude, latitude, naoblaka.getPrisutnost(), plaktoni.getPrisutnost(), pozar.getPrisutnost());
-            } else {
-                csvPrinter.printRecord("Error");
+            for(int i = 0; i < datumResponse.getNaoblake().size(); i++) {
+                csvPrinter.printRecord(requestList.getRequestList().get(i).getDatumVrijeme(),
+                                        datumResponse.getNaoblake().get(i).getPrimaryKeyId().getLongitude(),
+                                        datumResponse.getNaoblake().get(i).getPrimaryKeyId().getLatitude(),
+                                        datumResponse.getNaoblake().get(i).getPrisutnost(),
+                                        datumResponse.getPlanktoni().get(i).getPrisutnost(),
+                                        datumResponse.getPozari().get(i).getPrisutnost());
             }
         } catch (IOException e) {
 
         }
 
-    }
-
-    @GetMapping("/api/test")
-    void testmethod() throws IOException {
-        polarnaSvijetlostService.downloadDataPolarna();
     }
 }

@@ -24,7 +24,7 @@ public class NaoblakeService {
     public boolean downloadData(Date datum) {
         try {
             FileUtils.copyURLToFile(
-                    new URL("https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845944&cs=rgb&format=CSV&width=360&height=180"),
+                    new URL("https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845943&cs=rgb&format=CSV&width=360&height=180"),
                     new File("DataFolder\\Naoblaka.csv"));
         } catch (Exception exc) {
             return false;
