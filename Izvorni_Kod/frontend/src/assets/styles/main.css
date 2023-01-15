@@ -29,3 +29,7 @@
   margin: 20px;
 }
 .map { height: 90vh; }
+
+.filter {
+    display: flex;
+}

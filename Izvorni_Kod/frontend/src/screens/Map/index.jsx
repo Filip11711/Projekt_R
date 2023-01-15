@@ -5,26 +5,63 @@ import fire from '../../assets/images/fire-icon.png';
 import cloud from '../../assets/images/cloud-icon.png';
 import polar from '../../assets/images/polar-icon.png';
 import bioluminescence from '../../assets/images/bioluminescence-icon.png';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { useState } from "react";
 import dateTimeService from '../../services/dateTimeService';
+import Button from '../../components/Button';
+import { useNavigate } from 'react-router-dom';
 
 const Map = () => {
 
-  const { dateTime } = useParams();
+  const searchParams = new URLSearchParams(document.location.search)
+  const dateTime = searchParams.get('dateTime');
+  const type = searchParams.get('type');
+  const navigate = useNavigate();
   let data = {}
   const [error, setError] = useState(undefined);
-  const [naoblake, setNaoblake] = useState();
+  const [pojave, setPojava] = useState();
 
   const fetchData = async () => {
     data = await (await dateTimeService.oneDateTime(dateTime)).data;
-    setNaoblake(data.naoblake);
-    console.log(data);
+    if (type == 1) {
+      setPojava(data.Naoblake);
+      icon = cloudIcon;
+    }
+    if (type == 2) {
+      setPojava(data.Pozari);
+      icon = fireIcon;
+    }
+    if (type == 3) {
+      setPojava(data.Polarna);
+      icon = polarIcon;
+    }
+    if (type == 4) {
+      setPojava(data.Planktoni);
+      icon = bioIcon;
+    }
+
   }
 
   useEffect(() => {
+    console.log(type, dateTime);
     fetchData();
   },[]);
+
+  const handleClick1 = () => {
+    navigate('/map?dateTime=' + dateTime + '&type=1');
+  }
+
+  const handleClick2 = () => {
+    navigate('/map?dateTime=' + dateTime + '&type=2');
+  }
+
+  const handleClick3 = () => {
+    navigate('/map?dateTime=' + dateTime + '&type=3');
+  }
+
+  const handleClick4 = () => {
+    navigate('/map?dateTime=' + dateTime + '&type=4');
+  }
 
   let fireIcon = L.icon({
     iconUrl: fire,
@@ -49,9 +86,25 @@ const Map = () => {
     iconRetinaUrl: bioluminescence,
     iconSize: [15,15],
   });
+
+  let icon = cloudIcon;
   
   return (
     <div className="App">
+      <div className='form-container'>
+        <div className="filter" onClick={() => handleClick1()}>
+            <Button color="white" text="Naoblake"></Button>
+        </div>
+        <div className="filter" onClick={() => handleClick2()}>
+            <Button color="white" text="Pozari"></Button>
+        </div>
+        <div className="filter" onClick={() => handleClick3()}>
+            <Button color="white" text="Polarna svijetlost"></Button>
+        </div>
+        <div className="filter" onClick={() => handleClick4()}>
+            <Button color="white" text="Bioluminiscentni plaktoni"></Button>
+        </div>
+      </div>
       <div className="map" id="map">
          <MapContainer
             style={{height: "90vh"}}
@@ -61,10 +114,7 @@ const Map = () => {
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
-            {/*naoblake ? naoblake.map(naoblaka => (<Marker position={[naoblaka.primaryKeyId.latitude, naoblaka.primaryKeyId.longitude]} icon={ cloudIcon }></Marker>)) : null */}
-            <Marker position={[45, 15]} icon={ fireIcon }></Marker>
-            <Marker position={[30, 40]} icon={ polarIcon }></Marker>
-            <Marker position={[55, 70]} icon={ bioIcon }></Marker>
+            {pojave ? pojave.map(pojava => (pojava.prisutnost == 1 ? <Marker position={[pojava.primaryKeyId.latitude, pojava.primaryKeyId.longitude]} icon={ icon }></Marker> : <Marker position={[pojava.primaryKeyId.latitude, pojava.primaryKeyId.longitude]} icon={ fireIcon }></Marker> )) : null }
           </MapContainer>
         </div>
     </div>

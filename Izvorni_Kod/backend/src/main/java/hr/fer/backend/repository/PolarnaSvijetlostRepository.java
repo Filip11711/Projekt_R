@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface PolarnaSvijetlostRepository extends JpaRepository<PolarnaSvijetlost, PrimaryKeyId> {
-    List<PolarnaSvijetlost> findAllByPrimaryKey_Datumvrijeme(Timestamp datumvrijeme);
+    List<PolarnaSvijetlost> findAllByPrimaryKey_DatumvrijemeAndPrisutnost(Timestamp datumvrijeme, int prisutnost);
     PolarnaSvijetlost findByPrimaryKey(PrimaryKey primaryKey);
 
     @Query(value = "select datumvrijeme from polarna order by abs(datumvrijeme, :datumvrijeme)", nativeQuery = true)

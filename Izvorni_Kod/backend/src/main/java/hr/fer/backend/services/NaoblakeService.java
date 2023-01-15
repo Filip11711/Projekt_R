@@ -61,7 +61,20 @@ public class NaoblakeService {
     }
 
     public List<Naoblake> getNaoblakeByDatum(Date datum) {
-        return naoblakeRepository.findAllByPrimaryKeyId_DatumAndPrisutnostIsGreaterThanEqual(datum, 1);
+        List<Naoblake> naoblake = new ArrayList<>();
+        for (int i = -179; i <= 180; i++) {
+            for (int j = 90; j >= -90; j--) {
+                Naoblake naoblaka = naoblakeRepository.findByPrimaryKeyId(new PrimaryKeyId(datum, i, j));
+                if (naoblaka == null) {
+                    naoblake.add(new Naoblake(new PrimaryKeyId(datum, i, j), 1));
+                } else {
+                    if (naoblaka.getPrisutnost() == 2) {
+                        naoblake.add(naoblaka);
+                    }
+                }
+            }
+        }
+        return naoblake;
     }
 
     public Naoblake getNaoblakaByDatumAndLocation(Date datum, Integer Longitude, Integer Latitude) {

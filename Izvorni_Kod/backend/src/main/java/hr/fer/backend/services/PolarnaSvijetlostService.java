@@ -127,7 +127,7 @@ public class PolarnaSvijetlostService {
     }
 
     public List<PolarnaSvijetlost> getPolarnaSvijetlostByDatum(Timestamp datum) {
-        return polarnaSvijetlostRepository.findAllByPrimaryKey_Datumvrijeme(datum);
+        return polarnaSvijetlostRepository.findAllByPrimaryKey_DatumvrijemeAndPrisutnost(datum, 1);
     }
 
     public PolarnaSvijetlost getPolarnaSvijetlostByDatumAndCoordinates(Timestamp datumvrijeme, Integer longitude, Integer latitude) {

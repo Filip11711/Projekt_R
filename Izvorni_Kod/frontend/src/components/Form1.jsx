@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Button from './Button';
-import dataService from "../services/dateTimeService";
 import { useNavigate } from 'react-router-dom';
 
 const Form1 = () => {
@@ -9,7 +8,11 @@ const Form1 = () => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-      navigate('/map/' + dateTime)
+      if (dateTime == "") {
+        alert("Odaberite datum i vrijeme!!!");
+      } else {
+        navigate('/map?dateTime=' + dateTime + '&type=1');
+      }
   }
 
   return (

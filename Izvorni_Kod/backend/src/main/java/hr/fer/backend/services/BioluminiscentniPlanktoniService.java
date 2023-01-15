@@ -153,10 +153,9 @@ public class BioluminiscentniPlanktoniService {
                     list.add(new BioluminiscentniPlanktoniResponse(date, longitude, latitude, 1));
                 }
                 else if(latitude <= 51.35468 && latitude >= 51.34072   // Zeebrugge, Belgium
-                        && longitude >= 3.11697 && longitude <= 3.27420){
-                    list.add(new BioluminiscentniPlanktoniResponse(date, longitude, latitude, 1));
+                        && longitude >= 3.11697 && longitude <= 3.27420) {
+                        list.add(new BioluminiscentniPlanktoniResponse(date, longitude, latitude, 1));
                 }
-                else{ list.add(new BioluminiscentniPlanktoniResponse(date, longitude, latitude, 0)); }
             }
         }
     return list;

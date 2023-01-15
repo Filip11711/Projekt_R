@@ -11,7 +11,7 @@ function App() {
     <div>
       <Routes>
         <Route path='/' element={<HomePage></HomePage>}></Route>
-        <Route path='/map/:dateTime' element={<Map></Map>}></Route>
+        <Route path='/map' element={<Map></Map>}></Route>
       </Routes>
     </div>
     </BrowserRouter>
