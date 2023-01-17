@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -21,13 +22,24 @@ import java.util.Scanner;
 public class NaoblakeService {
     private final NaoblakeRepository naoblakeRepository;
 
-    public boolean downloadData(Date datum) {
+    public List<Naoblake> downloadDataByDatum(Date datum) {
+        String dateForLink = datum.toString();
+        HashMap<String, String> links = new HashMap<String, String>();
+        links.put("2023-01-17","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845946&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-16","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845945&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-15","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845944&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-14","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845943&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-13","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845943&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-12","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845941&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-11","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845940&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-10","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845960&cs=rgb&format=CSV&width=360&height=180");
+
         try {
             FileUtils.copyURLToFile(
-                    new URL("https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845943&cs=rgb&format=CSV&width=360&height=180"),
+                    new URL(links.get(dateForLink)),
                     new File("DataFolder\\Naoblaka.csv"));
         } catch (Exception exc) {
-            return false;
+            return new ArrayList<>();
         }
 
         List<Naoblake> naoblake = new ArrayList<>();
@@ -42,10 +54,12 @@ public class NaoblakeService {
                     while(rowScanner.hasNext()) {
                         try {
                             Float value = Float.valueOf(rowScanner.next());
-                            if (!(value >= 0.0 && value <= 1.0)) {
-                                naoblake.add(new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 2));
-                            } else if (value < 0.3) {
-                                naoblake.add(new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 0));
+                            if (Longitude % 3 == 0 && Latitude % 2 == 0) {
+                                if (!(value >= 0.0 && value <= 1.0)) {
+                                    naoblake.add(new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 2));
+                                } else if (value >= 0.3) {
+                                    naoblake.add(new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 1));
+                                }
                             }
                         } catch (Exception exc) {}
                         Longitude += 1;
@@ -54,51 +68,61 @@ public class NaoblakeService {
                 Latitude -= 1;
             }
         } catch (FileNotFoundException exc) {
-            return false;
-        }
-        insertAll(naoblake);
-        return true;
-    }
-
-    public List<Naoblake> getNaoblakeByDatum(Date datum) {
-        List<Naoblake> naoblake = new ArrayList<>();
-        for (int i = -179; i <= 180; i++) {
-            for (int j = 90; j >= -90; j--) {
-                Naoblake naoblaka = naoblakeRepository.findByPrimaryKeyId(new PrimaryKeyId(datum, i, j));
-                if (naoblaka == null) {
-                    naoblake.add(new Naoblake(new PrimaryKeyId(datum, i, j), 1));
-                } else {
-                    if (naoblaka.getPrisutnost() == 2) {
-                        naoblake.add(naoblaka);
-                    }
-                }
-            }
+            return new ArrayList<>();
         }
         return naoblake;
     }
 
-    public Naoblake getNaoblakaByDatumAndLocation(Date datum, Integer Longitude, Integer Latitude) {
-        return naoblakeRepository.findByPrimaryKeyId(new PrimaryKeyId(datum, Longitude, Latitude));
-    }
+    public Naoblake downloadDataByDatumAndCoordinates(Date datum, int longitude, int latitude) {
+        String dateForLink = datum.toString();
+        HashMap<String, String> links = new HashMap<String, String>();
+        links.put("2023-01-17","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845946&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-16","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845945&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-15","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845944&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-14","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845943&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-13","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845943&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-12","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845941&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-11","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845940&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-10","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1845960&cs=rgb&format=CSV&width=360&height=180");
 
-    public Boolean existsByDatum(Date datum) {
-        return naoblakeRepository.existsByPrimaryKeyId_Datum(datum);
-    }
-
-    public void insertAll(List<Naoblake> naoblake) {
-        int batchSize = 50;
-        int total = naoblake.size();
-
-        for (int i = 0; i < total; i = i + batchSize) {
-            if( i+ batchSize > total){
-                List<Naoblake> naoblake1 = naoblake.subList(i, total - 1);
-                naoblakeRepository.saveAll(naoblake1);
-                naoblakeRepository.flush();
-                break;
-            }
-            List<Naoblake> naoblake1 = naoblake.subList(i, i + batchSize);
-            naoblakeRepository.saveAll(naoblake1);
-            naoblakeRepository.flush();
+        try {
+            FileUtils.copyURLToFile(
+                    new URL(links.get(dateForLink)),
+                    new File("DataFolder\\Naoblaka.csv"));
+        } catch (Exception exc) {
+            return null;
         }
+
+        List<Naoblake> naoblake = new ArrayList<>();
+
+        try (Scanner scanner = new Scanner(new File("DataFolder\\Naoblaka.csv"));) {
+            Integer Latitude = 90;
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                try (Scanner rowScanner = new Scanner(line);) {
+                    Integer Longitude = -179;
+                    rowScanner.useDelimiter(",");
+                    while(rowScanner.hasNext()) {
+                        try {
+                            Float value = Float.valueOf(rowScanner.next());
+                            if (Longitude == longitude && Latitude == latitude) {
+                                if (!(value >= 0.0 && value <= 1.0)) {
+                                    return new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 2);
+                                } else if (value >= 0.3) {
+                                    return new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 1);
+                                } else {
+                                    return new Naoblake(new PrimaryKeyId(datum, Longitude, Latitude), 0);
+                                }
+                            }
+                        } catch (Exception exc) {}
+                        Longitude += 1;
+                    }
+                }
+                Latitude -= 1;
+            }
+        } catch (FileNotFoundException exc) {
+            return null;
+        }
+        return null;
     }
 }

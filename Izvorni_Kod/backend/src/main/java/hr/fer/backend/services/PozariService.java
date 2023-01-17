@@ -8,13 +8,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.net.URL;
 import java.io.File;
 import java.util.ArrayList;
-import java.net.URL;
-import java.io.IOException;
 import java.io.FileNotFoundException;
 
 @Service
@@ -22,14 +21,24 @@ import java.io.FileNotFoundException;
 public class PozariService {
     private final PozariRepository pozariRepository;
 
-    public boolean downloadData(Date datum) {
+    public List<Pozari> downloadDataByDatum(Date datum) {
+        String dateForLink = datum.toString();
+        HashMap<String, String> links = new HashMap<String, String>();
+        links.put("2023-01-17","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846568&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-16","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846559&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-15","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846567&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-14","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846558&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-13","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846556&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-12","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846562&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-11","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846563&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-10","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846390&cs=rgb&format=CSV&width=360&height=180");
 
         try {
             FileUtils.copyURLToFile(
-                    new URL("https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846176&cs=rgb&format=CSV&width=360&height=180"),
+                    new URL(links.get(dateForLink)),
                     new File("DataFolder\\Pozari.csv"));
         } catch (Exception exc) {
-            return false;
+            return new ArrayList<>();
         }
         List<Pozari> pozari = new ArrayList<>();
 
@@ -50,9 +59,7 @@ public class PozariService {
                         
                         try {
                             Float value = Float.valueOf(rowScanner.next());
-                            if (!(value >= 0.0 && value <= 1.0)) {
-                                pozari.add(new Pozari(new PrimaryKeyId(datum, Longitude, Latitude), 2));
-                            } else if (value >= 0.2) {
+                             if (value >= 0.1001 && value <= 1.0) {
                                 pozari.add(new Pozari(new PrimaryKeyId(datum, Longitude, Latitude), 1));
                             }
                         } catch (Exception exc) {}
@@ -63,42 +70,66 @@ public class PozariService {
                 Latitude -= 1;
             }
         } catch (FileNotFoundException exc) {
-            return false;
+            return new ArrayList<>();
         }
-    
-        insertAll(pozari);
-        return true;
+        return pozari;
     }
 
-    public List<Pozari> getPozariByDatum(Date datum) {
-        return pozariRepository.findAllByPrimaryKeyId_DatumAndPrisutnostIsGreaterThanEqual(datum, 1);
-    }
+    public Pozari downloadDataByDatumAndCoordinates(Date datum, int longitude, int latitude) {
+        String dateForLink = datum.toString();
+        HashMap<String, String> links = new HashMap<String, String>();
+        links.put("2023-01-17","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846568&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-16","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846559&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-15","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846567&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-14","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846558&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-13","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846556&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-12","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846562&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-11","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846563&cs=rgb&format=CSV&width=360&height=180");
+        links.put("2023-01-10","https://neo.gsfc.nasa.gov/servlet/RenderData?si=1846390&cs=rgb&format=CSV&width=360&height=180");
 
-    public Pozari getPozariByDatumAndLocation(Date datum, Integer Longitude, Integer Latitude) {
-        return pozariRepository.findByPrimaryKeyId(new PrimaryKeyId(datum, Longitude, Latitude));
-    }
+        try {
+            FileUtils.copyURLToFile(
+                    new URL(links.get(dateForLink)),
+                    new File("DataFolder\\Pozari.csv"));
+        } catch (Exception exc) {
+            return null;
+        }
+        List<Pozari> pozari = new ArrayList<>();
 
-    public Boolean existsByDatum(Date datum) {
-        return pozariRepository.existsByPrimaryKeyId_Datum(datum);
-    }
+        try (Scanner scanner = new Scanner(new File("DataFolder\\Pozari.csv"));) {
 
-    public void insertAll(List<Pozari> pozari) {
+            Integer Latitude = 90;
 
-        int batchSize = 50;         //iteracije kroz epohu (2.pot)
-        int total = pozari.size();
+            while(scanner.hasNextLine()) {
 
-        for (int i = 0; i < total; i = i + batchSize) {
+                String line = scanner.nextLine();
 
-            if( i+ batchSize > total){
-                List<Pozari> pozari1 = pozari.subList(i, total - 1);
-                pozariRepository.saveAll(pozari1);
-                pozariRepository.flush();
-                break;
+                try (Scanner rowScanner = new Scanner(line);) {
+
+                    Integer Longitude = -179;
+                    rowScanner.useDelimiter(",");
+
+                    while(rowScanner.hasNext()) {
+
+                        try {
+                            Float value = Float.valueOf(rowScanner.next());
+                            if (Longitude == longitude && Latitude == latitude) {
+                                if (value > 0.2 && value <= 1.0) {
+                                    return new Pozari(new PrimaryKeyId(datum, Longitude, Latitude), 1);
+                                } else {
+                                    return new Pozari(new PrimaryKeyId(datum, Longitude, Latitude), 0);
+                                }
+                            }
+                        } catch (Exception exc) {}
+
+                        Longitude += 1;
+                    }
+                }
+                Latitude -= 1;
             }
-
-            List<Pozari> pozari1 = pozari.subList(i, i + batchSize);
-            pozariRepository.saveAll(pozari1);
-            pozariRepository.flush();
+        } catch (FileNotFoundException exc) {
+            return null;
         }
+        return null;
     }
 }

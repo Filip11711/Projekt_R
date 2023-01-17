@@ -29,7 +29,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class PolarnaSvijetlostService {
     private final PolarnaSvijetlostRepository polarnaSvijetlostRepository;
 
-    @Scheduled(initialDelay = 60*60*1000, fixedDelay = 2*60*60*1000)
+    @Scheduled(initialDelay = 5*60*1000, fixedDelay = 2*60*60*1000)
     public void downloadDataPolarna() throws IOException {
         URL url = null;
         try {

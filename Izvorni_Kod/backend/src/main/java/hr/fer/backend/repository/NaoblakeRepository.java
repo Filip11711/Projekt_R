@@ -12,4 +12,5 @@ import java.util.List;
 public interface NaoblakeRepository extends JpaRepository<Naoblake, PrimaryKeyId> {
     Naoblake findByPrimaryKeyId(PrimaryKeyId primaryKeyId);
     Boolean existsByPrimaryKeyId_Datum(Date datum);
+    List<Naoblake> findAllByPrimaryKeyId_Datum(Date datum);
 }

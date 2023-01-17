@@ -14,6 +14,6 @@ public interface PolarnaSvijetlostRepository extends JpaRepository<PolarnaSvijet
     List<PolarnaSvijetlost> findAllByPrimaryKey_DatumvrijemeAndPrisutnost(Timestamp datumvrijeme, int prisutnost);
     PolarnaSvijetlost findByPrimaryKey(PrimaryKey primaryKey);
 
-    @Query(value = "select datumvrijeme from polarna order by abs(datumvrijeme, :datumvrijeme)", nativeQuery = true)
+    @Query(value = "select datumvrijeme from polarna order by abs(extract(epoch from (datumvrijeme - :datumvrijeme))) limit 1", nativeQuery = true)
     Timestamp findNearestTimestamp(@Param("datumvrijeme") Timestamp datumvrijeme);
 }

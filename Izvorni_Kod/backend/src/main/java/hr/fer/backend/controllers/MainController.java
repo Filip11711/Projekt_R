@@ -2,10 +2,7 @@ package hr.fer.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
-import hr.fer.backend.model.Naoblake;
-import hr.fer.backend.model.PolarnaSvijetlost;
-import hr.fer.backend.model.Pozari;
-import hr.fer.backend.model.PrimaryKeyId;
+import hr.fer.backend.model.*;
 import hr.fer.backend.requstClasses.DatumAndCoordinatesRequest;
 import hr.fer.backend.requstClasses.RequestList;
 import hr.fer.backend.responseClasses.BioluminiscentniPlanktoniResponse;
@@ -40,26 +37,14 @@ public class MainController {
 
     @CrossOrigin(origins = "*")
     @GetMapping("api/getByDatum")
-    ResponseEntity<?> getDataByDatum(@Valid @RequestParam LocalDateTime DatumVrijeme) throws IOException {
+    ResponseEntity<?> getDataByDatum(@Valid @RequestParam LocalDateTime DatumVrijeme) {
         LocalDate date = DatumVrijeme.toLocalDate();
         Date datum = Date.valueOf(DatumVrijeme.toLocalDate());
         Timestamp datumvrijeme = Timestamp.valueOf(DatumVrijeme);
 
-        /*if (!naoblakeService.existsByDatum(datum)) {
-            if(!naoblakeService.downloadData(datum)) {
-                return ResponseEntity.ok("Error");
-            }
-        }
-
-        if (!pozariService.existsByDatum(datum)) {
-            if(!pozariService.downloadData(datum)) {
-                return ResponseEntity.ok("Error");
-            }
-        }*/
-
         List<BioluminiscentniPlanktoniResponse> planktioni = bioluminiscentniPlanktoniService.getBioluminiscentnePlanktoneByDatum(date);
-        List<Pozari> pozari = pozariService.getPozariByDatum(datum);
-        List<Naoblake> naoblake = naoblakeService.getNaoblakeByDatum(datum);
+        List<Pozari> pozari = pozariService.downloadDataByDatum(datum);
+        List<Naoblake> naoblake = naoblakeService.downloadDataByDatum(datum);
 
         Timestamp closest = polarnaSvijetlostService.existByDatum(datumvrijeme);
         List<PolarnaSvijetlost> polarna = polarnaSvijetlostService.getPolarnaSvijetlostByDatum(closest);
@@ -79,27 +64,23 @@ public class MainController {
             Date datum = Date.valueOf(date);
             Timestamp datumvrijeme = Timestamp.valueOf(request.getDatumVrijeme());
 
-            if (!naoblakeService.existsByDatum(datum)) {
-                naoblakeService.downloadData(datum);
-            }
-            Naoblake naoblaka = naoblakeService.getNaoblakaByDatumAndLocation(datum, request.getLongitude(), request.getLatitude());
+            Naoblake naoblaka = naoblakeService.downloadDataByDatumAndCoordinates(datum, request.getLongitude(), request.getLatitude());
 
             if (naoblaka == null) {
-                naoblaka = new Naoblake(new PrimaryKeyId(datum, request.getLongitude(), request.getLatitude()), 1);
+                naoblaka = new Naoblake(new PrimaryKeyId(datum, request.getLongitude(), request.getLatitude()), 2);
             }
             BioluminiscentniPlanktoniResponse plaktoni = bioluminiscentniPlanktoniService.getgetBioluminiscentnePlanktoneByDatumAndCoordinates(date, request.getLongitude(), request.getLatitude());
 
-            //if (!pozariService.existsByDatum(datum)) {
-              //  pozariService.downloadData(datum);
-            //}
-
-            Pozari pozar = pozariService.getPozariByDatumAndLocation(datum, request.getLongitude(), request.getLatitude());
+            Pozari pozar = pozariService.downloadDataByDatumAndCoordinates(datum, request.getLongitude(), request.getLatitude());
             if (pozar == null) {
-                pozar = new Pozari(new PrimaryKeyId(datum, request.getLongitude(), request.getLatitude()), 0);
+                pozar = new Pozari(new PrimaryKeyId(datum, request.getLongitude(), request.getLatitude()), 2);
             }
 
             Timestamp closest = polarnaSvijetlostService.existByDatum(datumvrijeme);
             PolarnaSvijetlost polarna = polarnaSvijetlostService.getPolarnaSvijetlostByDatumAndCoordinates(closest, request.getLongitude(), request.getLatitude());
+            if (polarna == null) {
+                polarna = new PolarnaSvijetlost(new PrimaryKey(datumvrijeme, request.getLongitude(), request.getLatitude()), 0);
+            }
 
             datumResponse.getNaoblake().add(naoblaka);
             datumResponse.getPlanktoni().add(plaktoni);
@@ -110,15 +91,15 @@ public class MainController {
         servletResponse.setContentType("text/csv");
         servletResponse.addHeader("Content-Disposition","attachment; filename=\"PrirodnePojave.csv\"");
         try (CSVPrinter csvPrinter = new CSVPrinter(servletResponse.getWriter(), CSVFormat.DEFAULT)) {
-            csvPrinter.printRecord("Vremenska Oznaka", "Longitude", "Latitude", "Naoblake", "Bioluminiscentni planktoni", "Pozari", "Polarna svijetlost");
+            csvPrinter.printRecord("Vremenska Oznaka", "Latitude", "Longitude", "Naoblake", "Pozari", "Polarna svijetlost", "Bioluminiscentni planktoni");
             for(int i = 0; i < datumResponse.getNaoblake().size(); i++) {
                 csvPrinter.printRecord(requestList.getRequestList().get(i).getDatumVrijeme(),
                                         datumResponse.getNaoblake().get(i).getPrimaryKeyId().getLongitude(),
                                         datumResponse.getNaoblake().get(i).getPrimaryKeyId().getLatitude(),
                                         datumResponse.getNaoblake().get(i).getPrisutnost(),
-                                        datumResponse.getPlanktoni().get(i).getPrisutnost(),
                                         datumResponse.getPozari().get(i).getPrisutnost(),
-                                        datumResponse.getPolarna().get(i).getPrisutnost());
+                                        datumResponse.getPolarna().get(i).getPrisutnost(),
+                                        datumResponse.getPlanktoni().get(i).getPrisutnost());
             }
         } catch (IOException e) {
 

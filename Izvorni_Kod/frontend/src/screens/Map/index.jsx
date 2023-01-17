@@ -5,7 +5,8 @@ import fire from '../../assets/images/fire-icon.png';
 import cloud from '../../assets/images/cloud-icon.png';
 import polar from '../../assets/images/polar-icon.png';
 import bioluminescence from '../../assets/images/bioluminescence-icon.png';
-import { Navigate, useParams } from 'react-router-dom';
+import noData from '../../assets/images/noData.png';
+import { Navigate } from 'react-router-dom';
 import { useState } from "react";
 import dateTimeService from '../../services/dateTimeService';
 import Button from '../../components/Button';
@@ -17,29 +18,29 @@ const Map = () => {
   const dateTime = searchParams.get('dateTime');
   const type = searchParams.get('type');
   const navigate = useNavigate();
-  let data = {}
+  let data = {};
   const [error, setError] = useState(undefined);
-  const [pojave, setPojava] = useState();
+  const [pojave, setPojave] = useState([]);
 
   const fetchData = async () => {
     data = await (await dateTimeService.oneDateTime(dateTime)).data;
     if (type == 1) {
-      setPojava(data.Naoblake);
-      icon = cloudIcon;
+      setPojave(data.naoblake);
+      setIcon(cloudIcon);
     }
     if (type == 2) {
-      setPojava(data.Pozari);
-      icon = fireIcon;
+      setPojave(data.pozari);
+      setIcon(fireIcon);
     }
     if (type == 3) {
-      setPojava(data.Polarna);
-      icon = polarIcon;
+      setPojave(data.polarna);
+      setIcon(polarIcon);
     }
     if (type == 4) {
-      setPojava(data.Planktoni);
-      icon = bioIcon;
+      setPojave(data.planktoni);
+      setIcon(bioIcon);
     }
-
+    console.log(data);
   }
 
   useEffect(() => {
@@ -49,18 +50,26 @@ const Map = () => {
 
   const handleClick1 = () => {
     navigate('/map?dateTime=' + dateTime + '&type=1');
+    window.location.reload(true);
   }
 
   const handleClick2 = () => {
     navigate('/map?dateTime=' + dateTime + '&type=2');
+    window.location.reload(true);
   }
 
   const handleClick3 = () => {
     navigate('/map?dateTime=' + dateTime + '&type=3');
+    window.location.reload(true);
   }
 
   const handleClick4 = () => {
     navigate('/map?dateTime=' + dateTime + '&type=4');
+    window.location.reload(true);
+  }
+
+  const handleClick5 = () => {
+    navigate('/');
   }
 
   let fireIcon = L.icon({
@@ -78,7 +87,7 @@ const Map = () => {
   let polarIcon = L.icon({
     iconUrl: polar,
     iconRetinaUrl: polar,
-    iconSize: [15,15],
+    iconSize: [10,10],
   });
   
   let bioIcon = L.icon({
@@ -87,7 +96,13 @@ const Map = () => {
     iconSize: [15,15],
   });
 
-  let icon = cloudIcon;
+  let noDataIcon = L.icon({
+    iconUrl: noData,
+    iconRetinaUrl: noData,
+    iconSize: [15,15],
+  });
+
+  const [icon, setIcon] = useState(cloudIcon);
   
   return (
     <div className="App">
@@ -104,6 +119,10 @@ const Map = () => {
         <div className="filter" onClick={() => handleClick4()}>
             <Button color="white" text="Bioluminiscentni plaktoni"></Button>
         </div>
+        <div className="filter" onClick={() => handleClick5()}>
+            <Button color="white" text="Povratak"></Button>
+        </div>
+
       </div>
       <div className="map" id="map">
          <MapContainer
@@ -114,7 +133,18 @@ const Map = () => {
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
-            {pojave ? pojave.map(pojava => (pojava.prisutnost == 1 ? <Marker position={[pojava.primaryKeyId.latitude, pojava.primaryKeyId.longitude]} icon={ icon }></Marker> : <Marker position={[pojava.primaryKeyId.latitude, pojava.primaryKeyId.longitude]} icon={ fireIcon }></Marker> )) : null }
+            { type == 1 ?
+              (pojave ? pojave.map(pojava => (pojava.prisutnost == 1 ? <Marker position={[pojava.primaryKeyId.latitude, pojava.primaryKeyId.longitude]} icon={ icon }></Marker> : <Marker position={[pojava.primaryKeyId.latitude, pojava.primaryKeyId.longitude]} icon={ noDataIcon }></Marker>)) : null ) : null
+            }
+            { type == 2 ?
+              (pojave ? pojave.map(pojava => (<Marker position={[pojava.primaryKeyId.latitude, pojava.primaryKeyId.longitude]} icon={ icon }></Marker>)) : null ) : null
+            }
+            { type == 3 ?
+              (pojave ? pojave.map(pojava => (<Marker position={[pojava.primaryKey.latitude, pojava.primaryKey.longitude - 180]} icon={ icon }></Marker>)) : null ) : null
+            }
+            { type == 4 ?
+              (pojave ? pojave.map(pojava => (<Marker position={[pojava.latitude, pojava.longitude]} icon={ icon }></Marker>)) : null ) : null
+            }
           </MapContainer>
         </div>
     </div>
