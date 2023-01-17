@@ -1,4 +1,4 @@
-FROM openjdk:17-alpine AS builder
+FROM openjdk:19 AS builder
 
 COPY .mvn .mvn
 COPY mvnw .
