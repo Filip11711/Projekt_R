@@ -12,7 +12,6 @@ import hr.fer.backend.services.NaoblakeService;
 import hr.fer.backend.services.PolarnaSvijetlostService;
 import hr.fer.backend.services.PozariService;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -37,7 +36,7 @@ public class MainController {
 
     @CrossOrigin(origins = "*")
     @GetMapping("api/getByDatum")
-    ResponseEntity<?> getDataByDatum(@Valid @RequestParam LocalDateTime DatumVrijeme) {
+    ResponseEntity<?> getDataByDatum( @RequestParam LocalDateTime DatumVrijeme) {
         LocalDate date = DatumVrijeme.toLocalDate();
         Date datum = Date.valueOf(DatumVrijeme.toLocalDate());
         Timestamp datumvrijeme = Timestamp.valueOf(DatumVrijeme);
@@ -54,7 +53,7 @@ public class MainController {
 
     @CrossOrigin(origins = "*")
     @PostMapping("/api/getByDatumAndCoordinates")
-    void getCSVFile(HttpServletResponse servletResponse, @Valid @RequestBody String json) throws IOException {
+    void getCSVFile(HttpServletResponse servletResponse, @RequestBody String json) throws IOException {
         RequestList requestList = new ObjectMapper().registerModule(new JSR310Module()).readValue(json, RequestList.class);
 
         DatumResponse datumResponse = new DatumResponse(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
