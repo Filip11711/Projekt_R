@@ -1,4 +1,4 @@
-FROM openjdk:19-alpine AS builder
+FROM openjdk:17-alpine AS builder
 
 COPY .mvn .mvn
 COPY mvnw .
@@ -9,7 +9,7 @@ RUN chmod +x mvnw
 
 RUN ./mvnw clean package
 
-FROM openjdk:19-alpine
+FROM openjdk:17-alpine
 
 COPY --from=builder target/*.jar /app.jar
 
