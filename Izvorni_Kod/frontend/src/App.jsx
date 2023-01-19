@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes} from "react-router-dom"
 import HomePage from './screens/HomePage';
 import Map from "./screens/Map"
 
-export const api_url = "https://projekt-r-backend.onrender.com/api/";
+export const api_url = "http://localhost:8080/api/";
 
 function App() {
   return (

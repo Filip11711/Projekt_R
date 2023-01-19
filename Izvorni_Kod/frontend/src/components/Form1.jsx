@@ -17,10 +17,10 @@ const Form1 = () => {
 
   return (
     <div className='form'>
-        <p>Učitaj traženi datum</p>
+        <p>Učitaj traženi vremenski trenutak</p>
         <input type="datetime-local" id='datetime' onChange={(e) => {setDateTime(e.target.value)}}/>
         <div onClick={() => handleClick()}>
-            <Button color="white" text="Submit"></Button>
+            <Button color="white" text="Prihvati"></Button>
         </div>
     </div>
 

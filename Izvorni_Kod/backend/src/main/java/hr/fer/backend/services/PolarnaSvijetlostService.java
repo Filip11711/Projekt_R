@@ -118,7 +118,7 @@ public class PolarnaSvijetlostService {
             y = Integer.parseInt(yy);
             value = Integer.parseInt(valuee);
 
-            if(value > 3) {
+            if(value > 3 && (y > 10 || y < -10) ) {
                 polarnaSvijetlostRepository.save(new PolarnaSvijetlost(new PrimaryKey(vrijeme, x, y), 1));
             }
         }

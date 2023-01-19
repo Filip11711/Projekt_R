@@ -90,11 +90,11 @@ public class MainController {
         servletResponse.setContentType("text/csv");
         servletResponse.addHeader("Content-Disposition","attachment; filename=\"PrirodnePojave.csv\"");
         try (CSVPrinter csvPrinter = new CSVPrinter(servletResponse.getWriter(), CSVFormat.DEFAULT)) {
-            csvPrinter.printRecord("Vremenska Oznaka", "Latitude", "Longitude", "Naoblake", "Pozari", "Polarna svijetlost", "Bioluminiscentni planktoni");
+            csvPrinter.printRecord("Vremenska Oznaka", "Duljina", "Sirina", "Naoblake", "Pozari", "Polarna svijetlost", "Bioluminiscentni planktoni");
             for(int i = 0; i < datumResponse.getNaoblake().size(); i++) {
                 csvPrinter.printRecord(requestList.getRequestList().get(i).getDatumVrijeme(),
-                                        datumResponse.getNaoblake().get(i).getPrimaryKeyId().getLongitude(),
                                         datumResponse.getNaoblake().get(i).getPrimaryKeyId().getLatitude(),
+                                        datumResponse.getNaoblake().get(i).getPrimaryKeyId().getLongitude(),
                                         datumResponse.getNaoblake().get(i).getPrisutnost(),
                                         datumResponse.getPozari().get(i).getPrisutnost(),
                                         datumResponse.getPolarna().get(i).getPrisutnost(),

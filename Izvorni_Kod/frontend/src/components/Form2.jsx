@@ -36,7 +36,7 @@ const Form2 = () => {
         <p>Učitaj traženu JSON datoteku</p>
         <input type="file" onChange={(e)=>readFileOnUpload(e.target.files[0])} />
         <div onClick={() => handleClick()}>
-              <Button color="white" text="Submit"></Button>
+              <Button color="white" text="Prihvati"></Button>
         </div>
     </div>
     )
